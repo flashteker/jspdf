@@ -256,6 +256,10 @@ export default class JsPdfCmp extends LightningElement {
                 kReturnRect = this.drawHorizontalLayout(kChild, kNextChildArea);
             }
 
+            if(data.border?.thick){
+                this.drawRect(kReturnRect, data.border);
+            }
+
             //다음 그릴 요소들을 위해 가장 큰 endY를 찾는다.
             kMaxY = kReturnRect.h + kReturnRect.y;
 
@@ -455,10 +459,10 @@ export default class JsPdfCmp extends LightningElement {
             "PNG",
             area.x + data.margin.left,
             area.y + data.margin.top,
-            data.image.w,
-            data.image.h
+            data.image.width,
+            data.image.height
         );
-        const kReturnRect = {x:area.x, y:area.y, w:area.w, h:data.image.h + data.margin.top + data.margin.bottom};
+        const kReturnRect = {x:area.x, y:area.y, w:area.w, h:data.image.height + data.margin.top + data.margin.bottom};
         return kReturnRect;
     }
     
@@ -469,7 +473,7 @@ export default class JsPdfCmp extends LightningElement {
 
     drawRect(rect, border) {
         if(!border?.thick) return;
-        const kColor = this.modifyColor(border.color);
+        const kColor = this.modifyColor(border.color, this.colorGray);
         this.doc.setDrawColor(kColor.r, kColor.g, kColor.b);
         this.doc.setLineWidth(border.thick);
         this.doc.rect(rect.x, rect.y, rect.w, rect.h);
@@ -547,7 +551,7 @@ export default class JsPdfCmp extends LightningElement {
 
 
         kStyles.lineWidth = border?.thick;
-        const kLineColor = this.modifyColor(border?.color, this.colorWhite);
+        const kLineColor = kStyles.lineWidth ? this.modifyColor(border?.color) : this.colorWhite;
         kStyles.lineColor = [kLineColor.r, kLineColor.g, kLineColor.b];
 
         return kStyles;
@@ -562,7 +566,7 @@ export default class JsPdfCmp extends LightningElement {
         data.margin = {left:kMarginLeft, top:kMarginTop, right:kMarginRight, bottom:kMarginBottom};
         //border
         const kThick = data.border?.thick ?? 0;
-        const kBorderColor = this.modifyColor(data.border?.color);
+        const kBorderColor = this.modifyColor(data.border?.color, this.colorBlack);
         data.border = {thick:kThick, color:kBorderColor};
         //
         if(data.type == this.TYPE_TEXT){
@@ -576,7 +580,7 @@ export default class JsPdfCmp extends LightningElement {
 
     modifyColor(color, alt){
         const kAlt = alt ?? this.colorBlack;
-        const kColor = color ?? kAlt;
+        const kColor = color ?? {};
         kColor.r = kColor.r == null ? kAlt.r : kColor.r;
         kColor.g = kColor.g == null ? kAlt.g : kColor.g;
         kColor.b = kColor.b == null ? kAlt.b : kColor.b;

@@ -50,18 +50,9 @@ export default class WoPdfCmp extends LightningElement {
 
 
 
-    async handleOnDrawReady(event){
-        this.logoBase64 = await this.preloadImage(hyundai_logo);
-        const kPdfCmp = this.template.querySelector('c-js-pdf-cmp');
-        const kBodies = [
-            this.getImageData(20,20,{left:10, top:100}),
-            {type:'page'},
-            this.getImageData(20,20,{left:10, top:10}),
-        ];
-        kPdfCmp.startDraw({bodies:kBodies})
-    }
 
-    async handleOnDrawReady2(event){
+
+    async handleOnDrawReady(event){
         //먼저 pdf에 필요한 이미지들을 미리 업로드 해 놓는다.
         this.logoBase64 = await this.preloadImage(hyundai_logo);
         if(!this.logoBase64){
@@ -95,11 +86,11 @@ export default class WoPdfCmp extends LightningElement {
             this.getSummaryTableData(),//table View
 
 
-            this.getTextData("Terms And Condition",{top:20}, {fontSize:16})
+            this.getTextView("Terms And Condition",{top:20}, {fontSize:16})
         ];
 
         this.txtTermsList.forEach(txt => {
-            const kTxtData = this.getTextData(txt,{top:0},{fontSize:12});
+            const kTxtData = this.getTextView(txt + '\n',{top:0},{fontSize:12});
             kBodies.push(kTxtData);
         })
 
@@ -128,7 +119,6 @@ export default class WoPdfCmp extends LightningElement {
     getFooterView(){
         return {
             type:'horizontal',
-            border:{thick:0.2,color:{r:255}},
             children:[
                 this.getSignatureView('Director'),
                 this.getSignatureView('Dealer'),
@@ -141,11 +131,20 @@ export default class WoPdfCmp extends LightningElement {
     getSignatureView(title){
         return {
             type:'stack',
-            margin:{left:0},
+            margin:{left:2},
             children : [
-                {type:'text', styles:{fontSize:10}, text:"Signed by "},
+                {
+                    type:'text',
+                    styles:{fontSize:10},
+                    text:"Signed by "
+                },
                 this.getImageData(30,25),
-                {type:'line', border:{thick:0.5}, margin:{top:0},width:50},
+                {
+                    type:'line',
+                    border:{thick:0.5},
+                    margin:{top:0},
+                    width:50
+                },
                 {type:'text', styles:{fontSize:10}, text:title}
             ]
         }
@@ -165,72 +164,58 @@ export default class WoPdfCmp extends LightningElement {
               {
                   type:'stack',
                   children:[
-                      {
-                      type:'text',
-                      text:'Customer Info',
-                      styles:{
-                        halign:"center",
-                        fontSize:16,
-                        fontStyle:"bold",
-                        color:{r:60,g:60,b:60}
-                      },
-                      margin:{left:2, top:2}
-                     },
-                      {
-                        type:'table',
-                        margin:{left:2,top:6},//space from parent
-                        cellPadding:0.7,//셀과 텍스트간의 간격 head, body 구분하지 않음
-                        bodyStyles:[
-                            {cellWidth:20, halign:"center",valign:"middle", fontSize:12, fontStyle:"bold", color:{r:60, g:255, b:60}},
-                            {fontSize:11, valign:'middle'}
-                        ],
-                        body:[
-                            ['Name', "HOJIN YI"],
-                            ['Role', "CEO"],
-                            ['Address', "S.Korea Seoul Mapo Dongkyo Street 123456 Philp Apt. 1506-3456"],
-                            ["Tel.", "0012-456-987"]
-                        ]
-                    }
+                      this.getTextView('Customer Info', {left:2, top:2}, {halign:"center",fontSize:16,fontStyle:"bold",color:{r:60,g:60,b:60}}),
+                      this.getCustomerInfoTableView()
                   ]
               },
 
               {
                   type : 'stack',
                   children :[
-                      {
-                        type:'text',
-                        text:'Dealer Info',
-                        styles:{
-                          halign:"center",
-                          fontSize:16,
-                          fontStyle:"bold",
-                          color:{r:60,g:60,b:60}
-                        },
-                        margin:{left:2, top:2}
-                      },
-
-                      this.getImageData(40,null,{left:10}),
-
-                      {
-                        type:'table',
-                        margin:{left:2,top:2},//space from parent
-                        cellPadding:0.5,//셀과 텍스트간의 간격 head, body 구분하지 않음
-                        bodyStyles:[
-                            {cellWidth:20, fontSize:10},
-                            {fontSize:10}
-                        ],
-                        body:[
-                            ['Dealer', "Song JI Hoon"],
-                            ['Rank', "JJOLDDAGU"],
-                            ['Company', "I2Max Seoul Gong DUK. doesn't knoow K-Pop Demom Hunters."],
-                            ["Tel.", "000-0000-000"]
-                        ]
-                    }
+                      this.getTextView('Dealer Info', {left:2, top:2}, {halign:"center",fontSize:16,fontStyle:"bold",color:{r:60,g:60,b:60}}),
+                      this.getImageData(40,20,{left:10}),
+                      this.getDealerInfoTableView()
                   ]
               }
           ]
        }
     }
+
+    getCustomerInfoTableView(){
+        return {
+           type:'table',
+           margin:{left:2,top:6},//space from parent
+           cellPadding:0.7,//셀과 텍스트간의 간격 head, body 구분하지 않음
+           bodyStyles:[
+               {cellWidth:20, halign:"center",valign:"middle", fontSize:12, fontStyle:"bold", color:{r:60, g:255, b:60}},
+               {fontSize:11, valign:'middle'}
+           ],
+           body:[
+               ['Name', "HOJIN YI"],
+               ['Role', "CEO"],
+               ['Address', "S.Korea Seoul Mapo Dongkyo Street 123456 Philp Apt. 1506-3456"],
+               ["Tel.", "0012-456-987"]
+           ]
+       };
+    }
+
+    getDealerInfoTableView(){
+            return {
+               type:'table',
+               margin:{left:2,top:2},//space from parent
+               cellPadding:0.5,//셀과 텍스트간의 간격 head, body 구분하지 않음
+               bodyStyles:[
+                   {cellWidth:20, fontSize:10},
+                   {fontSize:10}
+               ],
+               body:[
+                   ['Dealer', "Song JI Hoon"],
+                   ['Rank', "JJOLDDAGU"],
+                   ['Company', "I2Max Seoul Gong DUK. doesn't knoow K-Pop Demom Hunters."],
+                   ["Tel.", "000-0000-000"]
+               ]
+           };
+        }
 
 
     getCategoryTitle(txt){
@@ -249,27 +234,27 @@ export default class WoPdfCmp extends LightningElement {
     getTableView(){
         const kHeadBgColor = {r:240, g:240, b:240}
         const kHeadStyles = [
-            {halign:"center", fontSize:13, bgColor:kHeadBgColor},
-            {halign:"center", fontSize:13, bgColor:kHeadBgColor},
-            {halign:"center", fontSize:13, bgColor:kHeadBgColor},
-            {halign:"center", fontSize:13, bgColor:kHeadBgColor},
-            {halign:"center", fontSize:13, bgColor:kHeadBgColor},
-            {halign:"center", fontSize:13, bgColor:kHeadBgColor},
+            {halign:"center", fontSize:14, bgColor:kHeadBgColor},
+            {halign:"center", fontSize:14, bgColor:kHeadBgColor},
+            {halign:"center", fontSize:14, bgColor:kHeadBgColor},
+            {halign:"center", fontSize:14, bgColor:kHeadBgColor},
+            {halign:"center", fontSize:14, bgColor:kHeadBgColor},
+            {halign:"center", fontSize:14, bgColor:kHeadBgColor},
         ]
         const kBodyStyles = [
-            {halign:"center", fontSize:12},
-            {halign:"left", fontSize:12},
-            {halign:"left", fontSize:12},
-            {halign:"right", fontSize:12},
-            {halign:"right", fontSize:12},
-            {halign:"right", fontSize:12, fontStyle:"bold"},
+            {halign:"center", fontSize:14},
+            {halign:"left", fontSize:14},
+            {halign:"left", fontSize:14},
+            {halign:"right", fontSize:14},
+            {halign:"right", fontSize:14},
+            {halign:"right", fontSize:14, fontStyle:"bold"},
         ];
 
 
         return{
             type:'table',
             border:{thick:0.2, color:{r:230, g:230, b:230}},
-            margin:{top:6},//space from parent
+            margin:{top:16},//space from parent
             cellPadding:2,//셀과 텍스트간의 간격 head, body 구분하지 않음
             headStyles:kHeadStyles,
             bodyStyles:kBodyStyles,
@@ -277,7 +262,7 @@ export default class WoPdfCmp extends LightningElement {
             body:[
                 ['Bolt 12', 'a123', 'bo_123', '$3,000', '30','$345,000'],
                 ['Nut 12', 'bbq123', 'nu_123', '$3,000', '30','$345,000'],
-                ['Hammer 12', 'ac123', 'acc_123', '$3,000', '30','$345,000']
+                ['Hammer 12', 'acdf123', 'acc_123', '$3,000', '30','$345,000']
             ]
         }
     }
@@ -312,12 +297,12 @@ export default class WoPdfCmp extends LightningElement {
         return {
             type:"image",
             margin:margin,
-            image:{src:this.logoBase64, w:kWidth, h:kHeight}
+            image:{src:this.logoBase64, width:kWidth, height:kHeight}
         }
     }
 
 
-    getTextData(aTxt, margin, styles, border){
+    getTextView(aTxt, margin, styles, border){
         return {
             type:'text',
             styles:styles,
