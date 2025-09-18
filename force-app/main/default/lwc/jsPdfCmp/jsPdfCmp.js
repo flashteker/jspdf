@@ -5,7 +5,6 @@ import jspdf from '@salesforce/resourceUrl/jspdf';
 import pdfviewer from '@salesforce/resourceUrl/pdfviewer';
 
 
-
 export default class JsPdfCmp extends LightningElement {
 
     @api TYPE_HORIZONTAL = 'horizontal';
@@ -155,9 +154,9 @@ export default class JsPdfCmp extends LightningElement {
 
 
     /**
-    * Footer를 그린다.
-    * 하단에서 여백이 충분한지 검토한 후 페이지를 추가여부 결정한다.
-    * prevArea는 여백을 계산하기 위해서 사용된다.
+    * 1. Footer를 그린다.
+    * 2. 하단에서 여백이 충분한지 검토한 후 페이지를 추가여부 결정한다.
+    * 3. prevArea는 여백을 계산하기 위해서 사용된다.
     */
     drawFooter(data, prevArea){
         if(!data?.child || !data?.height) return;
@@ -279,10 +278,12 @@ export default class JsPdfCmp extends LightningElement {
         return {x:area.x, y:area.y , w:area.w, h:kMaxY-area.y};
     }
 
-
+    /**
+    * 1.data의 type은 "horizontal"이다. 자식 view들을 테이블의 body에 담는다.
+    * 2.horizontal table body의 데이타 형식 (1행, 다열): [[data, data....]]
+    * 3.text는 셀의 content에 text를 담고, 그외는 빈 공백 문자를 담아 테이블을 그릴 때 아무것도 나오지 않도록 한다. (이후 비어 있는 셀에 자식뷰들을 담는다.)
+    */
     drawHorizontalLayout(data, area) {
-        //data의 type은 "horizontal_layout"이다.
-        //horizontal table body의 데이타 형식 (1행, 다열): [[data, data....]]
         let kBodies = [[]];
         const kCellWidth = area.w/data.children.length;
         //필요한 데이터만 채운다. text만 데이타를 채우고 그외는 비어 있는 공백 문자
