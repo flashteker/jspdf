@@ -107,7 +107,7 @@ export default class JsPdfCmp extends LightningElement {
         kArea.y = kArea.y + kArea.h;
         //====== 처음 그릴때는 무조건 vertical layout ====
         const kStackLayout = {children:data.bodies};
-        const kPrevArea = this.drawStackLayout(kStackLayout, kArea, true);
+        const kPrevArea = this.draw_stack(kStackLayout, kArea, true);
         //=== body를 다 그린 후 footer를 그린다.
         this.drawFooter(data.footer, kPrevArea);
         //footer까지 다 그리면 페이지 번호를 그린다.
@@ -147,7 +147,7 @@ export default class JsPdfCmp extends LightningElement {
             };
         }
 
-        this.drawHorizontalLayout(kChild, kArea);
+        this.draw_horizontal(kChild, kArea);
         kArea.h = data.height;
         return kArea;
     }
@@ -182,11 +182,11 @@ export default class JsPdfCmp extends LightningElement {
             x:this.pageMargin,
             y:bottomY - data.height,
             w:this.availableWidth };
-        this.drawHorizontalLayout(kChild, kArea);
+        this.draw_horizontal(kChild, kArea);
         return {x:this.pageMargin, y:kArea.y, w:this.availableWidth, h:data.height}
     }
 
-    drawStackLayout(data, area, isTopDepth) {
+    draw_stack(data, area, isTopDepth) {
         data = this.modifyNullData(data);
 
         //child area를 위해 필요한 값들을 설정한다.
@@ -217,10 +217,10 @@ export default class JsPdfCmp extends LightningElement {
             //================================
             if(kType == this.TYPE_LINE){
                 //line은 하나의 Horizontal layout으로 변경하지 않고 그린다.
-                kReturnRect = this.drawLine(kChild, kNextChildArea);
+                kReturnRect = this.draw_line(kChild, kNextChildArea);
             }else if(kType == this.TYPE_TABLE){
                 //table은 하나의 Horizontal layout으로 변경하지 않고 그린다.
-                kReturnRect = this.drawTable(kChild, kNextChildArea);
+                kReturnRect = this.draw_table(kChild, kNextChildArea);
             }else {
                 if (kType != this.TYPE_HORIZONTAL) {
                     /*
@@ -236,7 +236,7 @@ export default class JsPdfCmp extends LightningElement {
                 kNextChildArea.x = kStartX + kChild.margin.left;
                 kNextChildArea.y = kNextChildArea.y + kChild.margin.top;
 
-                kReturnRect = this.drawHorizontalLayout(kChild, kNextChildArea);
+                kReturnRect = this.draw_horizontal(kChild, kNextChildArea);
             }
 
             if(data.border?.thick){
@@ -283,7 +283,7 @@ export default class JsPdfCmp extends LightningElement {
     * 2.horizontal table body의 데이타 형식 (1행, 다열): [[data, data....]]
     * 3.text는 셀의 content에 text를 담고, 그외는 빈 공백 문자를 담아 테이블을 그릴 때 아무것도 나오지 않도록 한다. (이후 비어 있는 셀에 자식뷰들을 담는다.)
     */
-    drawHorizontalLayout(data, area) {
+    draw_horizontal(data, area) {
         let kBodies = [[]];
         const kCellWidth = area.w/data.children.length;
         //필요한 데이터만 채운다. text만 데이타를 채우고 그외는 비어 있는 공백 문자
@@ -305,7 +305,7 @@ export default class JsPdfCmp extends LightningElement {
     * 순수하게 텍스트로만 이루어진 테이블을 그린다.
     * data의 type은 "table"
     */
-    drawTable(data, area){
+    draw_table(data, area){
         data = this.modifyNullData(data);
         let kHeadData;//헤더는 row가 하나
         let kBodyData = [];
@@ -406,20 +406,8 @@ export default class JsPdfCmp extends LightningElement {
         content = this.modifyNullData(content);
         const kArea = {x:x, y:y, w:width};
 
-        let kReturnRect;
-        let kHeight = height;
         const kType = content.type;
-        if (kType == this.TYPE_IMAGE) {
-            kReturnRect = this.drawImage(content, kArea);
-        }else if(kType == this.TYPE_HORIZONTAL){
-            kReturnRect = this.drawHorizontalLayout(content, kArea);
-        }else if(kType == this.TYPE_STACK){
-             kReturnRect = this.drawStackLayout(content, kArea);
-        }else if(kType == this.TYPE_TABLE){
-             kReturnRect = this.drawTable(content, kArea);
-        }else if(kType == this.TYPE_LINE){
-              kReturnRect = this.drawLine(content, kArea);
-        }
+        let kReturnRect = this['draw_'+kType](content, kArea);
         //리턴되는 rect의 x/y/w는 셀의 크기로 변하면 안된다. 변하는 것은 height뿐이다.
         return {x:x, y:y, w:width, h: kReturnRect.h};
     }
@@ -428,7 +416,7 @@ export default class JsPdfCmp extends LightningElement {
     * 1. image를 그린다.
     * 2. src는 이미지의 base64 데이타이다.
     */
-    drawImage(data, area){
+    draw_image(data, area){
         data = this.modifyNullData(data);
         this.doc.addImage(
             data.image.src,
@@ -457,7 +445,7 @@ export default class JsPdfCmp extends LightningElement {
     * 1. 라인을 그린다.
     */
     @api
-    drawLine(data, drawArea) {
+    draw_line(data, drawArea) {
         this.doc.setLineWidth(data.border.thick);
         this.doc.setDrawColor(data.border.color.r,data.border.color.g,data.border.color.b);
         const kStartX = drawArea.x + data.margin.left;
