@@ -23,9 +23,6 @@ export default class WoPdfCmp extends LightningElement {
     }
 
 
-
-    longTxt = "1 Dealer is authorized to use the vehicle for purposes of the transaction-related purpose, including testing, inspection and/or delivery at customer’s own risk. 1 Dealer is authorized to use the vehicle for purposes of the transaction-related purpose, including testing, inspection and/or delivery at customer’s own risk. "
-
     txtTermsList = [
             "1. Dealer is authorized to use the vehicle for purposes of the transaction, including testing, inspection and/or delivery, at customer’s risk.",
 

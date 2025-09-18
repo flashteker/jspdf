@@ -1,9 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
-
-
 import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToast } from "c/commonShowToast";
-//import { CloseActionScreenEvent } from 'lightning/actions';
 import jspdf from '@salesforce/resourceUrl/jspdf';
 import pdfviewer from '@salesforce/resourceUrl/pdfviewer';
 
@@ -19,20 +16,16 @@ export default class JsPdfCmp extends LightningElement {
     @api TYPE_LINE = 'line';
     @api TYPE_PAGE = 'page';
 
-
     @api recordId; //no use
     @api headerTitle;
     @api pageMargin = 0;
     @api pageNumberVisible;
-
-
 
     isSpinner;
     doc;
     base64PDF;
     header;
     pageNumberSpace = 10;//페이지 숫자 공간
-
 
     availableWidth; //pdf를 그릴 수 있는 width
     availableHeight; //pdf를 그릴 수 있는 height
@@ -55,7 +48,6 @@ export default class JsPdfCmp extends LightningElement {
     2. pdf 그리기 준비가 완료되면 완료되었다는 것을 상위 콤포넌트에 전달한다.
     */
     async connectedCallback() {
-        //console.log('JsPdfCmp connected call back called');
         setTimeout(() => {
             this.loadLibrary();
         }, 300);
@@ -63,7 +55,7 @@ export default class JsPdfCmp extends LightningElement {
 
     /**
     * 라이브러리를 로드한다.
-    Load jsPDF - 순서가 중요하여 로딩을 나누었다.(load jsPDF > load autoTable > get data from server > generate PDF)
+    * Load jsPDF - 순서가 중요하여 로딩을 나누었다.(load jsPDF > load autoTable > get data from server > generate PDF)
     */
     async loadLibrary() {
         try {
@@ -88,7 +80,6 @@ export default class JsPdfCmp extends LightningElement {
             // Page
             this.doc.page = 1;
 
-
             ShowToast.showSuccess(this, 'library load done!')
             //상위에 준비상황 전달
             setTimeout(() => {
@@ -111,16 +102,13 @@ export default class JsPdfCmp extends LightningElement {
     @api
     startDraw(data) {
         this.isSpinner = true;
-        //console.log('startDraw called >>>> ', JSON.stringify(data));
         this.header = data.header;
         //맨처음 외부에서 호출때는 이 속성이 없다. 그래서 초기 값을 넣어준다. 처음에는 margin값 이 pageMargin으로 대신한다.
-        //const kArea = { x: this.pageMargin, y: this.pageMargin, w: this.availableWidth };
         let kArea = this.drawHeader(this.header);
         kArea.y = kArea.y + kArea.h;
         //====== 처음 그릴때는 무조건 vertical layout ====
         const kStackLayout = {children:data.bodies};
         const kPrevArea = this.drawStackLayout(kStackLayout, kArea, true);
-
         //=== body를 다 그린 후 footer를 그린다.
         this.drawFooter(data.footer, kPrevArea);
         //footer까지 다 그리면 페이지 번호를 그린다.
@@ -131,8 +119,8 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    1. 페이지를 추가한다.
-    2. Header가 있다면 헤더를 추가한다.
+    * 1. 페이지를 추가한다.
+    * 2. Header가 있다면 헤더를 추가한다.
     */
     addPage(){
         this.doc.addPage();
@@ -140,7 +128,7 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    header를 그린다.
+    * 1. header를 그린다.
     */
     drawHeader(data){
         let kArea = { x: this.pageMargin, y: this.pageMargin, w: this.availableWidth };
@@ -163,7 +151,6 @@ export default class JsPdfCmp extends LightningElement {
         this.drawHorizontalLayout(kChild, kArea);
         kArea.h = data.height;
         return kArea;
-
     }
 
 
@@ -189,7 +176,6 @@ export default class JsPdfCmp extends LightningElement {
 
         const kRemainingSpace = bottomY - (prevArea.y + prevArea.h + kChild.margin.top);//하단 여백
         if(kRemainingSpace < data.height){
-            //this.doc.addPage();
             this.addPage();
         }
 
@@ -203,7 +189,7 @@ export default class JsPdfCmp extends LightningElement {
 
     drawStackLayout(data, area, isTopDepth) {
         data = this.modifyNullData(data);
-        //console.log('drawStackLayout called >>>> ', JSON.stringify(data));
+
         //child area를 위해 필요한 값들을 설정한다.
         const kMarginLeft = data.margin.left;
         const kMarginTop = data.margin.top;
@@ -226,8 +212,6 @@ export default class JsPdfCmp extends LightningElement {
                     kReturnRect = this.addPage();
                     kMaxY = kReturnRect.y + kReturnRect.h;
                     kNextChildArea.y = kMaxY;
-//                    kMaxY = this.pageMargin;
-//                    kNextChildArea.y = this.pageMargin;
                 }
                 return;
             }
@@ -264,7 +248,7 @@ export default class JsPdfCmp extends LightningElement {
             kMaxY = kReturnRect.h + kReturnRect.y;
 
             //========================
-             //stacklayout에서 x와 w는 변하지 않는다.//child간의 y값에는 margin을 적용하지 않는다.
+             //stacklayout에서 x와 w는 변하지 않는다. child간의 y값에는 margin을 적용하지 않는다.
              kNextChildArea = {x:kStartX, y:kMaxY, w:kWidth};
 
             //top depth인 경우에만 페이지를 추가할 수 있다.
@@ -288,21 +272,16 @@ export default class JsPdfCmp extends LightningElement {
                      kReturnRect = this.addPage();
                      kMaxY = kReturnRect.y + kReturnRect.h;
                      kNextChildArea.y = kMaxY;
-//                     kMaxY = this.pageMargin;
-//                     kNextChildArea.y = this.pageMargin;
                 }
             }
         });
-
 
         return {x:area.x, y:area.y , w:area.w, h:kMaxY-area.y};
     }
 
 
     drawHorizontalLayout(data, area) {
-
         //data의 type은 "horizontal_layout"이다.
-        //console.log('drawHorizontalLayout called >>>> ', JSON.stringify(data));
         //horizontal table body의 데이타 형식 (1행, 다열): [[data, data....]]
         let kBodies = [[]];
         const kCellWidth = area.w/data.children.length;
@@ -321,14 +300,11 @@ export default class JsPdfCmp extends LightningElement {
         return this.drawHorizontalTable(data, area, kBodies);
     }
 
-
-
     /**
-    *순수하게 텍스트로만 이루어진 테이블을 그린다.
+    * 순수하게 텍스트로만 이루어진 테이블을 그린다.
     * data의 type은 "table"
     */
     drawTable(data, area){
-
         data = this.modifyNullData(data);
         let kHeadData;//헤더는 row가 하나
         let kBodyData = [];
@@ -353,7 +329,6 @@ export default class JsPdfCmp extends LightningElement {
            kBodyData.push(kCellArray);
         })
 
-       // kHeadData = kHeadData ? [kHeadData] : null;
         const kTheme = data.border.thick ? 'grid':'plain';
         const kMarginLeft = data.margin.left;//space from parent
         const kMarginTop = data.margin.top;//space from parent
@@ -371,7 +346,7 @@ export default class JsPdfCmp extends LightningElement {
             styles:{cellPadding:kCellPadding, overflow:'linebreak'},
             headStyles:{cellPadding:kCellPadding}
         });
-        //const kHeight = this.doc.lastAutoTable.finalY - area.y + kMarginTop;
+
         //마진가지 합쳐서 높이를 던져줄 필요는 없다.
         const kHeight = this.doc.lastAutoTable.finalY - area.y;
         //drawing후 리턴은 그려진 area를 넘긴다.(즉 h만 계산해서 보내면 된다.)
@@ -379,11 +354,10 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    * data : type = horizontal_layout
+    * data.type = horizontal_layout
     */
     drawHorizontalTable(data, area, bodies){
         //이건 실지로 테이블을 이용하여 horizontal layout(one-row table)을 그리는 것이다. 요소의 속성을 변경하기 위해서는 didDrawCell()에서 한다.
-        //console.log("drawHorizontalTable >>>> ", JSON.stringify(data))
 
         let kCellRects = [];//이후 테두리를 그릴 영역을 저장하기 위한 배열
         let kMaxY = area.y;//이걸 구해서 외곽선을 그린다.
@@ -420,14 +394,13 @@ export default class JsPdfCmp extends LightningElement {
                 this.drawRect(cellRect, data.border);
             });
         }
-        //const {bottomY} = this.getPageDimension(this.doc);
-        //console.log('max Y >>>>> ', kMaxY, ">>>bottom Y >>>", bottomY)
         return {x:area.x, y:area.y, w:area.w, h:kMaxHeight};
     }
 
-
+    /**
+    *  horizontal의 자식 뷰들을 강제로 테이블에 집어 넣어 그린다.
+    */
     drawCellContent(cellData, content) {
-        //console.log("drawCellContent >>>> ", JSON.stringify(content))
         const { x, y, width, height } = cellData.cell;
         content = this.modifyNullData(content);
         const kArea = {x:x, y:y, w:width};
@@ -450,8 +423,10 @@ export default class JsPdfCmp extends LightningElement {
         return {x:x, y:y, w:width, h: kReturnRect.h};
     }
 
-
-
+    /**
+    * 1. image를 그린다.
+    * 2. src는 이미지의 base64 데이타이다.
+    */
     drawImage(data, area){
         data = this.modifyNullData(data);
         this.doc.addImage(
@@ -462,26 +437,26 @@ export default class JsPdfCmp extends LightningElement {
             data.image.width,
             data.image.height
         );
-        const kReturnRect = {x:area.x, y:area.y, w:area.w, h:data.image.height + data.margin.top + data.margin.bottom};
-        return kReturnRect;
+        return {x:area.x, y:area.y, w:area.w, h:data.image.height + data.margin.top + data.margin.bottom};
     }
-    
 
-
-//
-
-
+    /**
+    * 사각형을 그린다.
+    */
     drawRect(rect, border) {
         if(!border?.thick) return;
         const kColor = this.modifyColor(border.color, this.colorGray);
         this.doc.setDrawColor(kColor.r, kColor.g, kColor.b);
         this.doc.setLineWidth(border.thick);
         this.doc.rect(rect.x, rect.y, rect.w, rect.h);
+        return rect;
     }
 
+    /**
+    * 1. 라인을 그린다.
+    */
     @api
     drawLine(data, drawArea) {
-
         this.doc.setLineWidth(data.border.thick);
         this.doc.setDrawColor(data.border.color.r,data.border.color.g,data.border.color.b);
         const kStartX = drawArea.x + data.margin.left;
@@ -494,18 +469,22 @@ export default class JsPdfCmp extends LightningElement {
         return drawArea;//area를 리턴한다.
     }
 
+    /**
+    * html내 iframe에 pdf 소스를 랜더링한다.
+    */
     publishPDF(doc) {
         // Set URL
         const kPdfUrl = URL.createObjectURL(doc.output('blob'));
         // Apex 전달 > Content Version으로 저장
         // PDF -> base64 string
         this.base64PDF = doc.output('datauristring').split(',')[1];
-
         const kIFrame = this.template.querySelector('iframe');
         kIFrame.src = `${pdfviewer}/web/viewer.html?file=${encodeURIComponent(kPdfUrl)}`;
     }
 
-
+    /**
+    * 1. 매 페이지 하단에 페이지 숫자를 그린다.
+    */
     drawPageNumber(doc){
         if(!this.pageNumberVisible) return;
         // 전체 페이지 수
@@ -521,6 +500,9 @@ export default class JsPdfCmp extends LightningElement {
 
 
     //===========================
+    /**
+    * 텍스트의 크기를 측정하여 리턴한다.
+    */
     getTextSize(aTxt, aFontSize, aMaxWidth) {
 
         if (!aTxt) return { w: 0, h: 0, totalH: 0 };
@@ -528,10 +510,11 @@ export default class JsPdfCmp extends LightningElement {
 
         let kMultiLineDimension = this.doc.getTextDimensions(aTxt, { fontSize: aFontSize, maxWidth: aMaxWidth ?? 0 });
         return { w: kSingleLineDimension.w, h: kSingleLineDimension.h, totalH: kMultiLineDimension.h };
-        //return {w:kDimension.w, h:kSingleDimension.h, totalH:kDimension.h + (aFontSize/2)};
     }
 
-
+    /**
+    * 페이지의 크기를 측정하여 리턴한다.
+    */
     getPageDimension(doc){
         const pageWidth = doc.internal.pageSize.width || doc.getPageWidth(); //약 210
         const pageHeight = doc.internal.pageSize.height || doc.getPageHeight(); //약 297
@@ -539,7 +522,7 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    type이 'table'인 테이블의 셀 스타일
+    * type이 'table'인 테이블의 셀 스타일
     */
     getCellStyles(styles, border){
         let kStyles = styles ?? {};
@@ -549,7 +532,6 @@ export default class JsPdfCmp extends LightningElement {
         const kBgColor = this.modifyColor(kStyles.bgColor, this.colorWhite);
         kStyles.fillColor = [kBgColor.r, kBgColor.g, kBgColor.b];
 
-
         kStyles.lineWidth = border?.thick;
         const kLineColor = kStyles.lineWidth ? this.modifyColor(border?.color) : this.colorWhite;
         kStyles.lineColor = [kLineColor.r, kLineColor.g, kLineColor.b];
@@ -557,6 +539,9 @@ export default class JsPdfCmp extends LightningElement {
         return kStyles;
     }
 
+    /**
+    * 기본값 중에서 null인 데이타들을 초기화 한다.
+    */
     modifyNullData(data){
         //margin
         const kMarginLeft = data.margin?.left == null ? 0:data.margin.left;
@@ -578,6 +563,9 @@ export default class JsPdfCmp extends LightningElement {
         return data;
     }
 
+    /**
+    * color 데이타중 null인 값을 초기화 한다.
+    */
     modifyColor(color, alt){
         const kAlt = alt ?? this.colorBlack;
         const kColor = color ?? {};
