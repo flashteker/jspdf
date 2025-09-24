@@ -3,10 +3,11 @@
     <c-js-pdf-cmp
     header-title="WorkOrder Invoice PDF"
     ondrawready={handleOnDrawReady}
+    record-id={recordId}
+    file-name={pdfFileName}
     onclose={handleClose}
     onsave={handleSave}
     page-margin={pdfPageMargin}
     page-number-visible={pageNumberVisible}
     ></c-js-pdf-cmp>
-
 </template>

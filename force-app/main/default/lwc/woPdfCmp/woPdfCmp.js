@@ -11,6 +11,7 @@ export default class WoPdfCmp extends LightningElement {
     pageNumberVisible = true;
     logoBase64;
     imageRatio;//width/height
+    pdfFileName;
 
     handleClose() {
         this.dispatchEvent(new CloseActionScreenEvent());
@@ -50,6 +51,7 @@ export default class WoPdfCmp extends LightningElement {
 
 
     async handleOnDrawReady(event){
+        this.pdfFileName = 'GodHojIn';
         //먼저 pdf에 필요한 이미지들을 미리 업로드 해 놓는다.
         this.logoBase64 = await this.preloadImage(hyundai_logo);
         if(!this.logoBase64){
