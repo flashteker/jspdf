@@ -52,7 +52,7 @@ export default class WoPdfCmp extends LightningElement {
 
 
     async handleOnDrawReady(event){
-        this.pdfFileName = 'GodHojIn2';
+        this.pdfFileName = 'RealGodJin';
         //먼저 pdf에 필요한 이미지들을 미리 업로드 해 놓는다.
         this.logoBase64 = await this.preloadImage(hyundai_logo);
         if(!this.logoBase64){
@@ -69,7 +69,9 @@ export default class WoPdfCmp extends LightningElement {
 
         const kBodies = [
             this.getHeaderTitle(),//Text View
-//            this.getHeaderView(),//'horizontal'
+            this.getQuotaHeaderView(),//'horizontal'
+
+            this.getRepairQuoteInfoView(),
 
             this.getCategoryTitle('Parts List'),//Text View
             this.getTableView(),// Table view
@@ -80,7 +82,7 @@ export default class WoPdfCmp extends LightningElement {
             this.getTableView(),// Table view
             this.getSummaryTableData(),//table View
 
-{type:'page'},
+            {type:'page'},
             this.getCategoryTitle('Etc List'),//Text View
             this.getTableView(),// Table view
             this.getSummaryTableData(),//table View
@@ -98,7 +100,7 @@ export default class WoPdfCmp extends LightningElement {
         kPdfCmp.startDraw({
             bodies:kBodies,
             footer:{height:45, child:this.getFooterView()},
-            header:{height:60, child:this.getHeaderView()}
+            header:{height:66, child:this.getHeaderView()}
         })
     }
 
@@ -151,8 +153,64 @@ export default class WoPdfCmp extends LightningElement {
     }
 
 
+    getQuotaHeaderView(){
+        const kCustInfoHeaderStyle = {
+                                   fontSize:16,
+                                   fontStyle:"bold",
+                                   color:{r:255,g:0,b:250},
+                                   bgColor:{r:220, g:220, b:220},
+                                   cellPadding:2
+                                };
+        return {
+            type:'horizontal',
+            margin:{top:4},
+            widthRatios:[0.6,0.4],
+            children:[
+                {
+                    type:'stack',
+                    border:{thick:0.1, color:{r:100, g:70, b:100}},
+                    children:[
+                        this.getTextView('Customer Information', null, kCustInfoHeaderStyle),
+                        this.getCustomerInfoTableView()
+                    ]
+                },
+
+                {
+                    type:'stack',
+                    margin:{left:4},
+                    children:[
+                        this.getTextView('QUOTATION', null, {fontSize:20,fontStyle:"bold"}),
+                        this.getDealerInfoTableView()
+                    ]
+                }
+            ]
+        }
+    }
 
 
+    getRepairQuoteInfoView(){
+        const kCustInfoHeaderStyle = {
+                                   fontSize:16,
+                                   fontStyle:"bold",
+                                   bgColor:{r:220, g:220, b:220},
+                                   cellPadding:2
+                                };
+        return {
+            type:'stack',
+            margin:{top:4, bottom:8},
+            border:{thick:0.1, color:{r:255, g:0, b:0}},
+            children:[
+                this.getTextView('Repair Quote Information', null, kCustInfoHeaderStyle),
+                {
+                    type:'horizontal',
+                    children:[
+                        this.getDealerInfoTableView(),
+                        this.getDealerInfoTableView()
+                    ]
+                }
+            ]
+        }
+    }
 
 
     getHeaderView(){
@@ -160,11 +218,13 @@ export default class WoPdfCmp extends LightningElement {
           type: 'horizontal',
           margin:{top:5},
           border:{thick:0.5, color:{r:0, g:70, b:0}},
+
           children:[
               {
                   type:'stack',
+                  //border:{thick:0.5, color:{r:0, g:70, b:0}},
                   children:[
-                      this.getTextView('Customer Info', {left:2, top:2}, {halign:"center",fontSize:16,fontStyle:"bold",color:{r:60,g:60,b:60}}),
+                      this.getTextView('Customer Info', {left:0, top:2}, {halign:"center",fontSize:16,fontStyle:"bold",color:{r:60,g:60,b:60}}),
                       this.getCustomerInfoTableView()
                   ]
               },

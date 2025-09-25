@@ -252,9 +252,11 @@ export default class JsPdfCmp extends LightningElement {
         const kMarginLeft = data.margin.left;
         const kMarginTop = data.margin.top;
         const kMarginRight = data.margin.right;
+        const kMarginBottom = data.margin.bottom;
         const kStartX = area.x + kMarginLeft;
         const kStartY = area.y + kMarginTop;
         const kWidth = area.w - (kMarginLeft + kMarginRight);
+        //
         let kNextChildArea = {x:kStartX, y:kStartY, w:kWidth};
         let kMaxY = kNextChildArea.y;
 
@@ -281,6 +283,8 @@ export default class JsPdfCmp extends LightningElement {
                 //table은 하나의 Horizontal layout으로 변경하지 않고 그린다.
                 kReturnRect = this.draw_table(kChild, kNextChildArea);
             }else {
+                let kMargin = kChild.margin;
+
                 if (kType != this.TYPE_HORIZONTAL) {
                     /*
                     horizontallayout이 아닌 View도 HorizontalLayout으로 그릴 수 있도록 조정한다. text조차도 그냥 그리지 않고 layout(table)으로 그린다.
@@ -288,19 +292,19 @@ export default class JsPdfCmp extends LightningElement {
                     kChild = {
                         type:this.TYPE_HORIZONTAL,
                         children:[kChild],
-                        margin:kChild.margin,
-                        border:kChild.border
+//                        margin:kChild.margin,
+//                        border:kChild.border
                     };
                 }
-                kNextChildArea.x = kStartX + kChild.margin.left;
-                kNextChildArea.y = kNextChildArea.y + kChild.margin.top;
+                kNextChildArea.x = kStartX + kMargin.left ;
+                kNextChildArea.y = kNextChildArea.y + kMargin.top;
 
                 kReturnRect = this.draw_horizontal(kChild, kNextChildArea);
             }
 
-            if(data.border?.thick){
-                this.drawRect(kReturnRect, data.border);
-            }
+//            if(data.border?.thick){
+//                this.drawRect(kReturnRect, data.border);
+//            }
 
             //다음 그릴 요소들을 위해 가장 큰 endY를 찾는다.
             kMaxY = kReturnRect.h + kReturnRect.y;
@@ -328,13 +332,18 @@ export default class JsPdfCmp extends LightningElement {
                 //페이지 추가
                 if((kMaxY + kNextHeight) > bottomY){
                      kReturnRect = this.addPage();
+
                      kMaxY = kReturnRect.y + kReturnRect.h;
                      kNextChildArea.y = kMaxY;
                 }
             }
         });
 
-        return {x:area.x, y:area.y , w:area.w, h:kMaxY-area.y};
+        const kDrawnArea = {x:kStartX, y:kStartY , w:kWidth, h:kMaxY-kStartY + kMarginBottom};
+        if(data.border?.thick){
+            this.drawRect(kDrawnArea, data.border);
+        }
+        return {x:area.x, y:area.y , w:area.w, h:kMaxY-area.y + kMarginBottom};;
     }
 
     /**
@@ -345,15 +354,28 @@ export default class JsPdfCmp extends LightningElement {
     draw_horizontal(data, area) {
         let kBodies = [[]];
         const kCellWidth = area.w/data.children.length;
+        const kWidthRatios = data.widthRatios ?? [];
         //필요한 데이터만 채운다. text만 데이타를 채우고 그외는 비어 있는 공백 문자
         data.children.forEach((child, index) => {
             let kType = child.type;
+
             const kStyles = this.getCellStyles(child.styles, child.border);
-            kStyles.cellWidth = kCellWidth;
+            if(kWidthRatios.length == data.children.length && kWidthRatios.length > index){
+                const kRatio = data.widthRatios[index];
+                kStyles.cellWidth = area.w * kRatio;
+            }else{
+                kStyles.cellWidth = kCellWidth;
+            }
+
             if(kType == this.TYPE_TEXT){
                 kBodies[0].push({content:child.text, styles:kStyles});
             }else{
+                if(kType == this.TYPE_STACK || kType == this.TYPE_HORIZONTAL){
+                    //stack 일 경우에는 cell border를 그리지 않는다.
+                    kStyles.lineWidth = 0;
+                }
                 kBodies[0].push({content:'', styles:kStyles});
+
             }
         });
         //data는 horizontal Layout
@@ -421,14 +443,14 @@ export default class JsPdfCmp extends LightningElement {
 
         let kCellRects = [];//이후 테두리를 그릴 영역을 저장하기 위한 배열
         let kMaxY = area.y;//이걸 구해서 외곽선을 그린다.
-
+        const kCellPadding = data.cellPadding == null ? 0 : data.cellPadding;
         this.doc.autoTable({
             theme:"plain", //plain : no-border, grid:border,
             startY:area.y, //pos y
             margin:{left:area.x, bottom:0}, //pos x
             tableWidth:area.w,
             body:bodies,
-            styles:{overflow:'linebreak', cellPadding:0, font:this._fontName},
+            styles:{overflow:'linebreak', cellPadding:kCellPadding, font:this._fontName},
 
             didDrawCell: (cellData) => {
                 const kChild = data.children[cellData.column.index];
@@ -448,11 +470,13 @@ export default class JsPdfCmp extends LightningElement {
 
         //cell에 외곽선을 그린다.
         const kMaxHeight = kMaxY - area.y;
+        const kDrawnArea = {x:area.x, y:area.y, w:area.w, h:kMaxHeight};
         if(data.border?.thick){
-            kCellRects.forEach(cellRect => {
-                cellRect.h = kMaxHeight;
-                this.drawRect(cellRect, data.border);
-            });
+            this.drawRect(kDrawnArea, data.border)
+//            kCellRects.forEach(cellRect => {
+//                cellRect.h = kMaxHeight;
+//                this.drawRect(cellRect, data.border);
+//            });
         }
         return {x:area.x, y:area.y, w:area.w, h:kMaxHeight};
     }
@@ -492,6 +516,7 @@ export default class JsPdfCmp extends LightningElement {
     * 사각형을 그린다.
     */
     drawRect(rect, border) {
+
         if(!border?.thick) return;
         const kColor = this.modifyColor(border.color, this.colorGray);
         this.doc.setDrawColor(kColor.r, kColor.g, kColor.b);
