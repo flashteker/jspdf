@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>application/zip</contentType>
+    <description>pdf에 사용되는 폰트 normal style (주로 영어이외의 문자가 사용될 때 사용한다.)</description>
+</StaticResource>
