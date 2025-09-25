@@ -3,6 +3,9 @@ import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToast } from "c/commonShowToast";
 import jspdf from '@salesforce/resourceUrl/jspdf';
 import pdfviewer from '@salesforce/resourceUrl/pdfviewer';
+import pdf_font_normal from '@salesforce/resourceUrl/pdf_font_normal';
+import pdf_font_bold from '@salesforce/resourceUrl/pdf_font_bold';
+
 import save from '@salesforce/apex/JsPdfController.save';
 
 
@@ -21,8 +24,18 @@ export default class JsPdfCmp extends LightningElement {
     @api headerTitle;
     @api pageMargin = 0;
     @api pageNumberVisible;
+    _fontName = 'Helvetica';
+    @api set fontName(aName){
+        console.log("fontan>>>>", aName)
+        this._fontName = aName;
+    }
+    get fontName(){
+        return this._fontName;
+    }
+
 
     isSpinner;
+
     doc;
     base64PDF;
     header;
@@ -76,6 +89,7 @@ export default class JsPdfCmp extends LightningElement {
     async loadLibrary() {
         try {
             this.isSpinner = true;
+
             await Promise.all([
                 loadScript(this, jspdf + '/jspdf.umd.min.js'),
                 loadScript(this, pdfviewer + '/build/pdf.js'),
@@ -85,10 +99,22 @@ export default class JsPdfCmp extends LightningElement {
             await Promise.all([
                 loadScript(this, jspdf + '/jspdf.plugin.autotable.js')
             ]);
+            //loading font - 폰트를 로드할 때, jspdf가 초기화 되기 이전에 로드해야 한다.
+            const kEmbeddedFont = ["helvetica", "courier","times", "symbol"];
+            if(!kEmbeddedFont.includes(this._fontName.toLowerCase())){
+                await Promise.all([
+                    loadScript(this, pdf_font_normal + '/normal.js'),
+                    loadScript(this, pdf_font_bold + '/bold.js')
+                ])
+            }
+
 
             //변수 초기화 !!!
             const { jsPDF } = await window.jspdf;
             this.doc = new jsPDF('p', 'mm', 'a4');
+
+//            console.log("font list >>>> ", JSON.stringify(this.doc.getFontList(), null, 2))
+            //            this.doc.setFont(this._fontName)
 
             const {pageWidth, pageHeight} = this.getPageDimension(this.doc);
             this.availableWidth = pageWidth - (this.pageMargin * 2);
@@ -110,8 +136,8 @@ export default class JsPdfCmp extends LightningElement {
 
 
     /**
-     * @param data : 그리려는 레이아웃 및 뷰 데이타
-     * @return nothing
+     * param data : 그리려는 레이아웃 및 뷰 데이타
+     * return nothing
      * 항상 startDraw(data)으로 그리기를 시작한다.
      * 전체 구조는
      * 1. Stack Layout으로 시작한다.
@@ -137,8 +163,8 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    * @param nothing
-    * @return rect : 그려진 영역 데이타
+    * param nothing
+    * return rect : 그려진 영역 데이타
     * 1. 페이지를 추가한다.
     * 2. Header가 있다면 헤더를 추가한다.
     */
@@ -148,8 +174,8 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    * @param data : 그리려는 레이아웃 및 뷰 데이타
-    * @return rect : 그려진 영역정보
+    * param data : 그리려는 레이아웃 및 뷰 데이타
+    * return rect : 그려진 영역정보
     * 1. header를 그린다.
     */
     drawHeader(data){
@@ -177,9 +203,9 @@ export default class JsPdfCmp extends LightningElement {
 
 
     /**
-    * @param data : 그리려는 레이아웃 및 뷰 데이타
-    * @param prevArea : 바로 직전에 그려진 뷰나 레이아웃의 영역
-    * @return rect : 그려진 영역정보
+    * param data : 그리려는 레이아웃 및 뷰 데이타
+    * param prevArea : 바로 직전에 그려진 뷰나 레이아웃의 영역
+    * return rect : 그려진 영역정보
     * 1. Footer를 그린다.
     * 2. 하단에서 여백이 충분한지 검토한 후 페이지를 추가여부 결정한다.
     * 3. prevArea는 여백을 계산하기 위해서 사용된다.
@@ -213,10 +239,10 @@ export default class JsPdfCmp extends LightningElement {
     }
 
     /**
-    * @param data : 그리려는 레이아웃 및 뷰 데이타
-    * @param area : 그릴 수 있는 영역(h 데이타는 없다.)
-    * @param isTopDepth : 지금 stack 레이아웃이 최상위 레이아웃인지 여부
-    * @return rect : 그려진 영역정보
+    * param data : 그리려는 레이아웃 및 뷰 데이타
+    * param area : 그릴 수 있는 영역(h 데이타는 없다.)
+    * param isTopDepth : 지금 stack 레이아웃이 최상위 레이아웃인지 여부
+    * return rect : 그려진 영역정보
     * 1. stack 레이아웃을 그린다.
     */
     draw_stack(data, area, isTopDepth) {
@@ -377,7 +403,7 @@ export default class JsPdfCmp extends LightningElement {
             tableWidth:kTableWidth,
             head:kHeadData,
             body:kBodyData,
-            styles:{cellPadding:kCellPadding, overflow:'linebreak'},
+            styles:{cellPadding:kCellPadding, overflow:'linebreak', font:this._fontName},
             headStyles:{cellPadding:kCellPadding}
         });
 
@@ -402,7 +428,7 @@ export default class JsPdfCmp extends LightningElement {
             margin:{left:area.x, bottom:0}, //pos x
             tableWidth:area.w,
             body:bodies,
-            styles:{overflow:'linebreak', cellPadding:0},
+            styles:{overflow:'linebreak', cellPadding:0, font:this._fontName},
 
             didDrawCell: (cellData) => {
                 const kChild = data.children[cellData.column.index];

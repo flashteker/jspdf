@@ -1,4 +1,3 @@
-
 import { LightningElement, api, track, wire } from 'lwc';
 import { CloseActionScreenEvent } from 'lightning/actions';
 
@@ -7,11 +6,13 @@ import hyundai_logo from '@salesforce/resourceUrl/hyundai_logo';
 export default class WoPdfCmp extends LightningElement {
 
     @api recordId;
+
     pdfPageMargin = 4;
     pageNumberVisible = true;
     logoBase64;
     imageRatio;//width/height
     pdfFileName;
+    usingSecondFont = true;
 
     handleClose() {
         this.dispatchEvent(new CloseActionScreenEvent());
@@ -43,7 +44,7 @@ export default class WoPdfCmp extends LightningElement {
 
             "9. The Customer warrants rightful possession of the vehicle and releases the Dealer from any related civil or criminal claims.  The Dealer shall not be held liable for any stolen vehicle claims.",
 //
-            "10. The Dealer disclaims responsibility and liability for the presence of firearms, prohibited drugs, or explosives found inside the vehicle."
+            "10. 무엇보다 이 js pdf 작성함에 있어 충실히 테스트하고, 피드백을 줄 수 있도록 한다. 그렇게 함으로써 우리는 좀더 나은 프로젝트를 수행할 수 있을 것이다."
         ];
 
 
@@ -51,7 +52,7 @@ export default class WoPdfCmp extends LightningElement {
 
 
     async handleOnDrawReady(event){
-        this.pdfFileName = 'GodHojIn';
+        this.pdfFileName = 'GodHojIn2';
         //먼저 pdf에 필요한 이미지들을 미리 업로드 해 놓는다.
         this.logoBase64 = await this.preloadImage(hyundai_logo);
         if(!this.logoBase64){
@@ -104,7 +105,7 @@ export default class WoPdfCmp extends LightningElement {
     getHeaderTitle(){
         return {
            type:'text',
-           text:'Work Order Invoice',
+           text:'테스트 인보이스 pdf',
            styles:{
                halign:"center",
                fontSize:20,
@@ -135,7 +136,7 @@ export default class WoPdfCmp extends LightningElement {
                 {
                     type:'text',
                     styles:{fontSize:10},
-                    text:"Signed by "
+                    text:"사인 한 사람 "
                 },
                 this.getImageData(30,25),
                 {
