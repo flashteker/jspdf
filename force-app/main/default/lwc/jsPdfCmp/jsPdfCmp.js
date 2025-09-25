@@ -122,7 +122,7 @@ export default class JsPdfCmp extends LightningElement {
             // Page
             this.doc.page = 1;
 
-            ShowToast.showSuccess(this, 'library load done!')
+            ShowToast.showSuccess(this, 'Ready for PDF!');
             //상위에 준비상황 전달
             setTimeout(() => {
                 this.dispatchEvent(new CustomEvent('drawready', {}));
