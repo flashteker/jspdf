@@ -414,6 +414,7 @@ export default class JsPdfCmp extends LightningElement {
         const kTheme = data.border.thick ? 'grid':'plain';
         const kMarginLeft = data.margin.left;//space from parent
         const kMarginTop = data.margin.top;//space from parent
+        const kMarginBottom = data.margin.bottom;//space from parent
         const kX = area.x + kMarginLeft;//posX
         const kY = area.y + kMarginTop;
         const kTableWidth = area.w - kMarginLeft;//왼쪽만 이동한 만큼 폭을 줄인다.(오른쪽은 줄이지 않는다.)
@@ -441,7 +442,7 @@ export default class JsPdfCmp extends LightningElement {
     drawHorizontalTable(data, area, bodies){
         //이건 실지로 테이블을 이용하여 horizontal layout(one-row table)을 그리는 것이다. 요소의 속성을 변경하기 위해서는 didDrawCell()에서 한다.
 
-        let kCellRects = [];//이후 테두리를 그릴 영역을 저장하기 위한 배열
+        //let kCellRects = [];//이후 테두리를 그릴 영역을 저장하기 위한 배열
         let kMaxY = area.y;//이걸 구해서 외곽선을 그린다.
         const kCellPadding = data.cellPadding == null ? 0 : data.cellPadding;
         this.doc.autoTable({
@@ -462,15 +463,16 @@ export default class JsPdfCmp extends LightningElement {
                 }else{
                    kReturnRect = this.drawCellContent(cellData, kChild);
                 }
-                kCellRects.push(kReturnRect);
+                //kCellRects.push(kReturnRect);
 
                 kMaxY = Math.max(kReturnRect.h + kReturnRect.y, kMaxY);
             }
         });
 
         //cell에 외곽선을 그린다.
+        const kMarginBottom = data.margin?.top ?? 0;
         const kMaxHeight = kMaxY - area.y;
-        const kDrawnArea = {x:area.x, y:area.y, w:area.w, h:kMaxHeight};
+        const kDrawnArea = {x:area.x, y:area.y, w:area.w, h:kMaxHeight + kMarginBottom};
         if(data.border?.thick){
             this.drawRect(kDrawnArea, data.border)
 //            kCellRects.forEach(cellRect => {
@@ -478,7 +480,7 @@ export default class JsPdfCmp extends LightningElement {
 //                this.drawRect(cellRect, data.border);
 //            });
         }
-        return {x:area.x, y:area.y, w:area.w, h:kMaxHeight};
+        return {x:area.x, y:area.y, w:area.w, h:kMaxHeight + kMarginBottom};
     }
 
     /**
