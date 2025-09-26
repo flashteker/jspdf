@@ -367,7 +367,7 @@ export default class JsPdfCmp extends LightningElement {
                 kBodies[0].push({content:child.text, styles:kStyles});
             }else{
                 if(kType == this.TYPE_STACK || kType == this.TYPE_HORIZONTAL){
-                    //stack 일 경우에는 cell border를 그리지 않는다.
+                    //Layout은 layout 그리기에서 rect를 그리기에 테이블에서 cell border를 그리지 않는다.
                     kStyles.lineWidth = 0;
                 }
                 kBodies[0].push({content:'', styles:kStyles});
