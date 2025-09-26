@@ -3,9 +3,6 @@ import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToast } from "c/commonShowToast";
 import jspdf from '@salesforce/resourceUrl/jspdf';
 import pdfviewer from '@salesforce/resourceUrl/pdfviewer';
-import pdf_font_normal from '@salesforce/resourceUrl/pdf_font_normal';
-import pdf_font_bold from '@salesforce/resourceUrl/pdf_font_bold';
-
 import save from '@salesforce/apex/JsPdfController.save';
 
 
@@ -24,9 +21,10 @@ export default class JsPdfCmp extends LightningElement {
     @api headerTitle;
     @api pageMargin = 0;
     @api pageNumberVisible;
+    @api normalFontPath;
+    @api boldFontPath;
     _fontName = 'Helvetica';
     @api set fontName(aName){
-        console.log("fontan>>>>", aName)
         this._fontName = aName;
     }
     get fontName(){
@@ -102,10 +100,16 @@ export default class JsPdfCmp extends LightningElement {
             //loading font - 폰트를 로드할 때, jspdf가 초기화 되기 이전에 로드해야 한다.
             const kEmbeddedFont = ["helvetica", "courier","times", "symbol"];
             if(!kEmbeddedFont.includes(this._fontName.toLowerCase())){
-                await Promise.all([
-                    loadScript(this, pdf_font_normal + '/normal.js'),
-                    loadScript(this, pdf_font_bold + '/bold.js')
-                ])
+                if(this.normalFontPath){
+                    await Promise.all([loadScript(this, this.normalFontPath)]);
+                }
+                if(this.boldFontPath){
+                    await Promise.all([loadScript(this, this.boldFontPath)]);
+                }
+//                await Promise.all([
+////                    loadScript(this, pdf_font_normal + '/normal.js'),
+////                    loadScript(this, pdf_font_bold + '/bold.js')
+//                ])
             }
 
 
@@ -129,7 +133,7 @@ export default class JsPdfCmp extends LightningElement {
             }, 200);
 
         } catch (error) {
-            ShowToast.showError(this, error);
+            ShowToast.showError(this, error?.toString());
         }
         this.isSpinner = false;
     }

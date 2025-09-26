@@ -1,5 +1,7 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { CloseActionScreenEvent } from 'lightning/actions';
+import pdf_font_normal from '@salesforce/resourceUrl/pdf_font_normal';
+import pdf_font_bold from '@salesforce/resourceUrl/pdf_font_bold';
 
 import hyundai_logo from '@salesforce/resourceUrl/hyundai_logo';
 
@@ -49,10 +51,12 @@ export default class WoPdfCmp extends LightningElement {
 
 
 
-
+    pdfFontNormalPath = pdf_font_normal + '/normal.js';
+    pdfFontBoldPath = pdf_font_bold + '/bold.js';
 
     async handleOnDrawReady(event){
         this.pdfFileName = 'RealGodJin';
+
         //먼저 pdf에 필요한 이미지들을 미리 업로드 해 놓는다.
         this.logoBase64 = await this.preloadImage(hyundai_logo);
         if(!this.logoBase64){
