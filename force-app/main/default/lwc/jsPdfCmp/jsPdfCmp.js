@@ -292,7 +292,7 @@ export default class JsPdfCmp extends LightningElement {
                     kChild = {
                         type:this.TYPE_HORIZONTAL,
                         children:[kChild],
-//                        margin:kChild.margin,
+//                        margin:kChild.margin, //area가 이동 했기에 child가지 굳이 이동할 필요는 없다.
 //                        border:kChild.border
                     };
                 }
@@ -301,10 +301,6 @@ export default class JsPdfCmp extends LightningElement {
 
                 kReturnRect = this.draw_horizontal(kChild, kNextChildArea);
             }
-
-//            if(data.border?.thick){
-//                this.drawRect(kReturnRect, data.border);
-//            }
 
             //다음 그릴 요소들을 위해 가장 큰 endY를 찾는다.
             kMaxY = kReturnRect.h + kReturnRect.y;
@@ -470,7 +466,7 @@ export default class JsPdfCmp extends LightningElement {
         });
 
         //cell에 외곽선을 그린다.
-        const kMarginBottom = data.margin?.top ?? 0;
+        const kMarginBottom = data.margin?.bottom ?? 0;
         const kMaxHeight = kMaxY - area.y;
         const kDrawnArea = {x:area.x, y:area.y, w:area.w, h:kMaxHeight + kMarginBottom};
         if(data.border?.thick){

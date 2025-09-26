@@ -216,7 +216,7 @@ export default class WoPdfCmp extends LightningElement {
     getHeaderView(){
         return {
           type: 'horizontal',
-          margin:{top:5, bottom:20},
+          margin:{top:5},
           border:{thick:0.5, color:{r:0, g:70, b:0}},
 
           children:[
