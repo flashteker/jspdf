@@ -21,8 +21,9 @@ export default class JsPdfCmp extends LightningElement {
     @api headerTitle;
     @api pageMargin = 0;
     @api pageNumberVisible;
-    @api normalFontPath;
-    @api boldFontPath;
+    @api customFontPaths;
+//    @api normalFontPath;
+//    @api boldFontPath;
     _fontName = 'Helvetica';
     @api set fontName(aName){
         this._fontName = aName;
@@ -100,16 +101,11 @@ export default class JsPdfCmp extends LightningElement {
             //loading font - 폰트를 로드할 때, jspdf가 초기화 되기 이전에 로드해야 한다.
             const kEmbeddedFont = ["helvetica", "courier","times", "symbol"];
             if(!kEmbeddedFont.includes(this._fontName.toLowerCase())){
-                if(this.normalFontPath){
-                    await Promise.all([loadScript(this, this.normalFontPath)]);
+                if(this.customFontPaths){
+                    for(const kPath of this.customFontPaths){
+                        await Promise.all([loadScript(this, kPath)]);
+                    }
                 }
-                if(this.boldFontPath){
-                    await Promise.all([loadScript(this, this.boldFontPath)]);
-                }
-//                await Promise.all([
-////                    loadScript(this, pdf_font_normal + '/normal.js'),
-////                    loadScript(this, pdf_font_bold + '/bold.js')
-//                ])
             }
 
 

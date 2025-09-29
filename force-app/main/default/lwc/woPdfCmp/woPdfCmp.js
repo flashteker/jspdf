@@ -51,8 +51,8 @@ export default class WoPdfCmp extends LightningElement {
 
 
 
-    pdfFontNormalPath = pdf_font_normal + '/normal.js';
-    pdfFontBoldPath = pdf_font_bold + '/bold.js';
+    fontPathList = [pdf_font_normal + '/normal.js', pdf_font_bold + '/bold.js'];
+//    pdfFontBoldPath = pdf_font_bold + '/bold.js';
 
     async handleOnDrawReady(event){
         this.pdfFileName = 'RealGodJin';
