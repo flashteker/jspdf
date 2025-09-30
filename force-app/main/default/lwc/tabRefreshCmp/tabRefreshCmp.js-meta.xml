@@ -12,8 +12,8 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
-            <property name="objectApiName" type="String" label="Object API Name" default="WorkOrder"/>
-            <property name="fieldApiName" type="String" label="Field API Name" default="Status"/>
+            <property name="objectApiName" type="String" label="Object API Name"/>
+            <property name="fieldApiName" type="String" label="Field API Name"/>
         </targetConfig>
         <targetConfig targets="lightningCommunity__Default">
             <property name="recordId" type="String" label="Record ID" description="Should be set to {!recordId}"/>
