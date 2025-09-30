@@ -10,8 +10,9 @@ Created Date : 9/29/25
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import { RefreshEvent } from "lightning/refresh";
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TabRefreshCmp extends LightningElement {
+export default class TabRefreshCmp extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
     @api fieldApiName;
@@ -29,12 +30,24 @@ export default class TabRefreshCmp extends LightningElement {
                     this.prevValue = kWiredFieldValue;
                 }else if(this.prevValue != kWiredFieldValue){
                     //this.dispatchEvent(new RefreshEvent());//detail fields만 변경
-                    window.location.reload();
+                    this.reloadPage();
                 }
             }
         }else if(error){
             console.log("error >>> ", error)
         }
+    }
+
+    reloadPage() {
+        //캐시를 지우기 위해서 windlow.location.reload()를 사용하지 못한다.
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: this.recordId,
+                objectApiName: this.objectApiName,
+                actionName: 'view'
+            }
+        }, true); // true = replace history
     }
 
 }
