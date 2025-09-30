@@ -10,7 +10,6 @@ Created Date : 9/29/25
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import { RefreshEvent } from "lightning/refresh";
-import WO_STATUS_FIELD from '@salesforce/schema/WorkOrder.Status';
 
 export default class TabRefreshCmp extends LightningElement {
     @api recordId;
